@@ -1,9 +1,29 @@
 import tkinter as tk
 import math
+import re
 
 def evaluate(event):
     try:
         expr = entry.get()
+
+        replacements = {
+           r'(\d+)sin': r'\1*math.sin(math.radians(',
+           r'(\d+)cos': r'\1*math.cos(math.radians(',
+           r'(\d+)tan': r'\1*math.tan(math.radians(',
+           r'sin(\d+)': r'math.sin(math.radians(\1))',
+           r'cos(\d+)': r'math.cos(math.radians(\1))',
+           r'tan(\d+)': r'math.tan(math.radians(\1))',
+           'log': 'math.log('
+        }
+
+        for key, val in replacements.items():
+            expr = re.sub(key, val, expr)
+        
+        for val in replacements.values():
+            count_open = expr.count(val)
+            count_close = expr.count(')')
+            if count_open > count_close:
+                expr += ')' * (expr.count('(') - expr.count(')'))
 
         if "^2" in expr:
             result.set(float(expr.split("^2")[0]) ** 2)
@@ -42,6 +62,7 @@ buttons = [
     '4', '5', '6', '*',
     '1', '2', '3', '-',
     '^2', '√', '1/', '!',
+    'sin', 'cos', 'tan', 'log',
     'C', '0', '=', '+'
 ]
 
@@ -99,10 +120,10 @@ color_dropdown.pack(pady=10)
 entry.pack(pady=20)
 result_label.pack(pady=20)
 
-clear_button = button_frame.winfo_children()[16]
-clear_button.bind('<Button-1>', clear)
-
-equal_button = button_frame.winfo_children()[18]
-equal_button.bind('<Button-1>', evaluate)
+for button in button_frame.winfo_children():
+    if button['text'] == 'C':
+        button.bind('<Button-1>', clear)
+    elif button['text'] == '=':
+        button.bind('<Button-1>', evaluate)
 
 app.mainloop()
