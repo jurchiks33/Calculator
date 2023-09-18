@@ -45,11 +45,43 @@ buttons = [
     'C', '0', '=', '+'
 ]
 
+number_button_style = {
+    "font": ("Arial", 16, "bold"),
+    "bg": "#d3d3d3",
+    "activebackground": "#a3a3a3",
+    "borderwidth": 3,
+    "relief": "ridge"
+}
+
+operator_button_style = {
+    "font": ("Arial", 16, "bold"),
+    "bg": "#f2a265",
+    "activebackground": "#f28f53",
+    "borderwidth": 3,
+    "relief": "ridge"
+}
+
+function_button_style = {
+    "font": ("Arial", 16, "bold"),
+    "bg": "#f2d56d",
+    "activebackground": "#f2bf60",
+    "borderwidth": 3,
+    "relief": "ridge"
+}
+
 row, col = 0, 0
 for btn in buttons:
     button_command = (lambda b=btn: 
                       lambda: entry.insert(tk.END, b if b != "C" else ""))()
-    tk.Button(button_frame, text=btn, width=5, height=2, command=button_command).grid(row=row, column=col)
+    style = {}
+    if btn in ['7', '8', '9', '4', '5', '6', '1', '2', '3', '0']:
+        style = number_button_style
+    elif btn in ['/', '*', '-', '+', '=']:
+        style = operator_button_style
+    else:
+        style = function_button_style
+
+    tk.Button(button_frame, text=btn, width=5, height=2, command=button_command, **style).grid(row=row, column=col)
     col += 1
     if col > 3:
         col = 0
