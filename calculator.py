@@ -10,6 +10,11 @@ def clear(event):
     entry.delete(0, tk.END)
     result.set("")
 
+def change_color(color):
+    app.configure(bg=color)
+    button_frame.configure(bg=color)
+    result_label.configure(bg=color)
+
 app = tk.Tk()
 app.title("Enhanced Calculator")
 
@@ -27,8 +32,9 @@ buttons = [
 ]
 
 row, col = 0, 0
-for button in buttons:
-    tk.Button(button_frame, text=button, width=5, height=2, command=lambda b=button: entry.insert(tk.END, b if b != "C" else "")).grid(row=row, column=col)
+for btn in buttons:
+    button_command = lambda b=btn: entry.insert(tk.END, b if b != "C" else "")
+    tk.Button(button_frame, text=btn, width=5, height=2, command=button_command).grid(row=row, column=col)
     col += 1
     if col > 3:
         col = 0
@@ -36,6 +42,12 @@ for button in buttons:
 
 result = tk.StringVar()
 result_label = tk.Label(app, textvariable=result, font=("Arial", 18))
+
+colors = ["lightgray", "lightblue", "lightgreen", "lightyellow", "lightpink"]
+selected_color = tk.StringVar()
+selected_color.set(colors[0])
+color_dropdown = tk.OptionMenu(app, selected_color, *colors, command=change_color)
+color_dropdown.pack(pady=10)
 
 entry.pack(pady=20)
 result_label.pack(pady=20)
