@@ -1,7 +1,9 @@
 import tkinter as tk
 import math
 import re
-import sympy
+import sympy 
+
+from sympy import sympify, pi, cos, log
 
 def evaluate(event):
     try:
