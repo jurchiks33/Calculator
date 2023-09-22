@@ -1,52 +1,29 @@
 import tkinter as tk
 import math
 import re
-import sympy 
-
-from sympy import sympify, pi, cos, log
 
 def evaluate(event):
     try:
         expr = entry.get()
-        print("Original Expression", expr)
 
-        direct_replacements = {
-            'asin': 'asin',
-            'acos': 'acos',
-            'atan': 'atan',
-            'sinh': 'sinh',
-            'cosh': 'cosh',
-            'tanh': 'tanh',
-            'log': 'log',
-            'π': 'pi',
-            'e': 'E',
-            r'\^': '**',
-            r'(\d+)%': r'\1*0.01',
-}
-        lambda_replacements = {
-            r'(\d+)sin': lambda match: f'{match.group(1)}*math.sin(math.radians({match.group(1)}))',
-            r'(\d+)cos': lambda match: f'{match.group(1)}*math.cos(math.radians({match.group(1)}))',
-            r'(\d+)tan': lambda match: f'{match.group(1)}*math.tan(math.radians({match.group(1)}))',
-}
+        replacements = {
+           r'(\d+)sin': r'\1*math.sin(math.radians(',
+           r'(\d+)cos': r'\1*math.cos(math.radians(',
+           r'(\d+)tan': r'\1*math.tan(math.radians(',
+           r'sin(\d+)': r'math.sin(math.radians(\1))',
+           r'cos(\d+)': r'math.cos(math.radians(\1))',
+           r'tan(\d+)': r'math.tan(math.radians(\1))',
+           'log': 'math.log('
+        }
 
-        for key, val in direct_replacements.items():
+        for key, val in replacements.items():
             expr = re.sub(key, val, expr)
-
-        for key, func in lambda_replacements.items():
-            expr = re.sub(key, func, expr)
         
-        print("Modified Expression", expr)
-
-        expr += ')' * (expr.count('(') - expr.count(')'))
-
-        if "=" in expr:
-            raise ValueError("Invalid Expression: contains '='" )
-        
-        result.set(sympy.sympify(expr))
-        
-
-        if "=" in expr:
-            result.set(float(expr.split("^2")[0]) ** 2)
+        for val in replacements.values():
+            count_open = expr.count(val)
+            count_close = expr.count(')')
+            if count_open > count_close:
+                expr += ')' * (expr.count('(') - expr.count(')'))
 
         if "^2" in expr:
             result.set(float(expr.split("^2")[0]) ** 2)
@@ -59,7 +36,6 @@ def evaluate(event):
         else:
             result.set(eval(expr))
     except Exception as e:
-        print("Error:", e)
         result.set("Error")
 
 
@@ -82,11 +58,12 @@ button_frame = tk.Frame(app)
 button_frame.pack(pady=10)
 
 buttons = [
-    '(', ')', '7', '8', '9', '/',
-    'π', 'e', '4', '5', '6', '*',
-    '^', '√', '1/', '!', '1', '2', '3', '-',
-    'asin', 'acos', 'atan', 'log10', 'sin', 'cos', 'tan', 'log',
-    '%', 'C', '0', '=', '+'
+    '7', '8', '9', '/',
+    '4', '5', '6', '*',
+    '1', '2', '3', '-',
+    '^2', '√', '1/', '!',
+    'sin', 'cos', 'tan', 'log',
+    'C', '0', '=', '+'
 ]
 
 number_button_style = {
@@ -118,16 +95,16 @@ for btn in buttons:
     button_command = (lambda b=btn: 
                       lambda: entry.insert(tk.END, b if b != "C" else ""))()
     style = {}
-    if btn in ['7', '8', '9', '4', '5', '6', '1', '2', '3', '0', 'π', 'e']:
+    if btn in ['7', '8', '9', '4', '5', '6', '1', '2', '3', '0']:
         style = number_button_style
-    elif btn in ['/', '*', '-', '+', '=', '^', '%']:
+    elif btn in ['/', '*', '-', '+', '=']:
         style = operator_button_style
     else:
         style = function_button_style
 
     tk.Button(button_frame, text=btn, width=5, height=2, command=button_command, **style).grid(row=row, column=col)
     col += 1
-    if col > 5:
+    if col > 3:
         col = 0
         row += 1
 
